@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b1220">
+  <title>Controle de Táxi</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #08111f;
+      --card: #101d30;
+      --card-2: #14243a;
+      --border: #223957;
+      --text: #f4f7fb;
+      --muted: #91a4bd;
+      --green: #20c77a;
+      --green-dark: #123c30;
+      --red: #ff5c62;
+      --red-dark: #48242b;
+      --yellow: #ffc62e;
+      --blue: #4c8dff;
+      --radius: 18px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% -10%, #17345c 0, transparent 38%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 14px 12px 110px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(16, 29, 48, .92);
+      box-shadow: 0 12px 35px rgba(0,0,0,.18);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .taxi-icon {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 43px;
+      border-radius: 13px;
+      background: rgba(255,198,46,.12);
+      font-size: 25px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: -.4px;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .price-badge {
+      flex: 0 0 auto;
+      text-align: right;
+    }
+
+    .price-badge span {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      margin-bottom: 2px;
+    }
+
+    .price-badge strong {
+      color: var(--yellow);
+      font-size: 16px;
+    }
+
+    /* SUMMARY */
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(145deg, #12233a, #0e1a2c);
+      padding: 14px;
+    }
+
+    .summary-card.total {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 17px;
+      border-color: rgba(255,198,46,.2);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .summary-value.green {
+      color: var(--green);
+    }
+
+    .summary-value.yellow {
+      color: var(--yellow);
+    }
+
+    .total-right {
+      text-align: right;
+    }
+
+    .total-right .summary-value {
+      font-size: 25px;
+    }
+
+    /* CALENDAR */
+    .calendar-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(16,29,48,.94);
+      padding: 12px;
+      box-shadow: 0 12px 35px rgba(0,0,0,.15);
+    }
+
+    .month-bar {
+      display: grid;
+      grid-template-columns: 44px 1fr 44px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .month-bar h2 {
+      text-align: center;
+      margin: 0;
+      font-size: 18px;
+      text-transform: capitalize;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--card-2);
+      font-size: 22px;
+      transition: .15s;
+    }
+
+    .nav-btn:active {
+      transform: scale(.94);
+      background: #1b3150;
+    }
+
+    .weekdays,
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .weekday {
+      text-align: center;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 0 5px;
+      text-transform: uppercase;
+    }
+
+    .day {
+      min-width: 0;
+      min-height: 72px;
+      padding: 7px 4px 5px;
+      border: 1px solid #1e3553;
+      border-radius: 13px;
+      background: #0d1a2b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .day.empty {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .day-number {
+      font-size: 12px;
+      font-weight: 800;
+      align-self: flex-start;
+      margin-left: 4px;
+      color: #dce6f2;
+    }
+
+    .day.weekend .day-number {
+      color: #7f93ad;
+    }
+
+    .day.today {
+      border-color: rgba(255,198,46,.65);
+      box-shadow: inset 0 0 0 1px rgba(255,198,46,.12);
+    }
+
+    .day.today .day-number::after {
+      content: " HOJE";
+      color: var(--yellow);
+      font-size: 7px;
+      margin-left: 2px;
+      vertical-align: 2px;
+    }
+
+    .ride-buttons {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .ride {
+      height: 28px;
+      border-radius: 9px;
+      background: #14253c;
+      border: 1px solid #27405f;
+      color: #657b96;
+      font-size: 12px;
+      font-weight: 900;
+      transition: .12s;
+    }
+
+    .ride:active {
+      transform: scale(.9);
+    }
+
+    .ride.selected {
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .ride.ida.selected,
+    .ride.volta.selected {
+      background: var(--green);
+      box-shadow: 0 4px 12px rgba(32,199,122,.2);
+    }
+
+    .ride-label {
+      display: block;
+      font-size: 6px;
+      font-weight: 600;
+      opacity: .75;
+      margin-top: -1px;
+    }
+
+    /* LEGEND */
+    .legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 10px 4px 1px;
+      border-top: 1px solid #1c314b;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot.green { background: var(--green); }
+    .dot.gray { background: #38516f; }
+    .dot.yellow { background: var(--yellow); }
+
+    /* ACTIONS */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .action {
+      min-height: 46px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--card-2);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .action:active {
+      transform: scale(.98);
+    }
+
+    .action.clear {
+      color: #ff9297;
+      border-color: rgba(255,92,98,.25);
+    }
+
+    /* MONTH TOTAL */
+    .month-info {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #0d1929;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .month-info strong {
+      color: #dfe8f2;
+    }
+
+    /* DESKTOP */
+    @media (min-width: 700px) {
+      .app {
+        max-width: 1050px;
+        padding: 25px 20px 40px;
+      }
+
+      .header {
+        padding: 20px;
+      }
+
+      .brand h1 {
+        font-size: 25px;
+      }
+
+      .brand p {
+        font-size: 12px;
+      }
+
+      .price-badge strong {
+        font-size: 19px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr 1fr 1.5fr;
+      }
+
+      .summary-card.total {
+        grid-column: auto;
+      }
+
+      .calendar-card {
+        padding: 20px;
+      }
+
+      .day {
+        min-height: 100px;
+        padding: 9px 7px 7px;
+      }
+
+      .day-number {
+        font-size: 14px;
+      }
+
+      .ride {
+        height: 35px;
+      }
+
+      .ride-label {
+        font-size: 7px;
+      }
+
+      .month-bar h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <header class="header">
+      <div class="brand">
+        <div class="taxi-icon">🚕</div>
+        <div>
+          <h1>Controle de Táxi</h1>
+          <p>Marque sua ida e volta e veja o valor automaticamente.</p>
+        </div>
+      </div>
+
+      <div class="price-badge">
+        <span>VALOR POR DIA</span>
+        <strong>R$ 10,00</strong>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="summary-card">
+        <div class="summary-label">DIAS UTILIZADOS</div>
+        <div class="summary-value green" id="usedDays">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">DIAS NÃO UTILIZADOS</div>
+        <div class="summary-value" id="unusedDays">0</div>
+      </div>
+
+      <div class="summary-card total">
+        <div>
+          <div class="summary-label">TOTAL A PAGAR</div>
+          <div style="font-size:10px;color:var(--muted)">Cada dia com pelo menos uma viagem</div>
+        </div>
+        <div class="total-right">
+          <div class="summary-value yellow" id="total">R$ 0,00</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="calendar-card">
+      <div class="month-bar">
+        <button class="nav-btn" id="prevMonth" aria-label="Mês anterior">‹</button>
+        <h2 id="monthTitle"></h2>
+        <button class="nav-btn" id="nextMonth" aria-label="Próximo mês">›</button>
+      </div>
+
+      <div class="weekdays">
+        <div class="weekday">Dom</div>
+        <div class="weekday">Seg</div>
+        <div class="weekday">Ter</div>
+        <div class="weekday">Qua</div>
+        <div class="weekday">Qui</div>
+        <div class="weekday">Sex</div>
+        <div class="weekday">Sáb</div>
+      </div>
+
+      <div class="calendar" id="calendar"></div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="dot green"></span> Selecionado</div>
+        <div class="legend-item"><span class="dot gray"></span> Não selecionado</div>
+        <div class="legend-item"><span class="dot yellow"></span> Hoje</div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="action" id="todayBtn">📅 Ir para este mês</button>
+      <button class="action clear" id="clearBtn">🗑️ Limpar mês</button>
+    </div>
+
+    <div class="month-info">
+      <strong>Como usar:</strong> toque em <strong>IDA</strong> ou <strong>VOLTA</strong> em cada dia.
+      Se pelo menos uma das duas viagens estiver marcada, o dia entra automaticamente na conta de
+      <strong>R$ 10,00</strong>.
+      Os registros ficam salvos automaticamente neste navegador.
+    </div>
+
+  </main>
+
+  <script>
+    const PRICE_PER_DAY = 10;
+
+    const STORAGE_KEY = "controleTaxiRegistros_v1";
+
+    let currentDate = new Date();
+    currentDate.setDate(1);
+
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+    const calendar = document.getElementById("calendar");
+    const monthTitle = document.getElementById("monthTitle");
+    const usedDaysEl = document.getElementById("usedDays");
+    const unusedDaysEl = document.getElementById("unusedDays");
+    const totalEl = document.getElementById("total");
+
+    const monthNames = [
+      "janeiro", "fevereiro", "março", "abril",
+      "maio", "junho", "julho", "agosto",
+      "setembro", "outubro", "novembro", "dezembro"
+    ];
+
+    function pad(number) {
+      return String(number).padStart(2, "0");
+    }
+
+    function dateKey(year, month, day) {
+      return `${year}-${pad(month + 1)}-${pad(day)}`;
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function formatMoney(value) {
+      return value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function getRecord(key) {
+      return records[key] || { ida: false, volta: false };
+    }
+
+    function renderCalendar() {
+      calendar.innerHTML = "";
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      monthTitle.textContent = `${monthNames[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Espaços antes do primeiro dia.
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "day empty";
+        calendar.appendChild(empty);
+      }
+
+      const today = new Date();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const key = dateKey(year, month, day);
+        const record = getRecord(key);
+
+        const cell = document.createElement("div");
+        cell.className = "day";
+
+        const date = new Date(year, month, day);
+        if (date.getDay() === 0 || date.getDay() === 6) {
+          cell.classList.add("weekend");
+        }
+
+        if (
+          today.getFullYear() === year &&
+          today.getMonth() === month &&
+          today.getDate() === day
+        ) {
+          cell.classList.add("today");
+        }
+
+        const number = document.createElement("div");
+        number.className = "day-number";
+        number.textContent = pad(day);
+
+        const buttons = document.createElement("div");
+        buttons.className = "ride-buttons";
+
+        const idaBtn = createRideButton("ida", "✓", "IDA", record.ida, key);
+        const voltaBtn = createRideButton("volta", "✓", "VOLTA", record.volta, key);
+
+        buttons.appendChild(idaBtn);
+        buttons.appendChild(voltaBtn);
+
+        cell.appendChild(number);
+        cell.appendChild(buttons);
+
+        calendar.appendChild(cell);
+      }
+
+      updateSummary();
+    }
+
+    function createRideButton(type, symbol, label, selected, key) {
+      const button = document.createElement("button");
+
+      button.className = `ride ${type}${selected ? " selected" : ""}`;
+      button.setAttribute("aria-label", `${label} ${selected ? "selecionada" : "não selecionada"}`);
+
+      button.innerHTML = `
+        ${selected ? "✓" : "○"}
+        <span class="ride-label">${label}</span>
+      `;
+
+      button.addEventListener("click", () => {
+        if (!records[key]) {
+          records[key] = { ida: false, volta: false };
+        }
+
+        records[key][type] = !records[key][type];
+
+        // Remove registros completamente vazios para manter o armazenamento limpo.
+        if (!records[key].ida && !records[key].volta) {
+          delete records[key];
+        }
+
+        save();
+        renderCalendar();
+      });
+
+      return button;
+    }
+
+    function updateSummary() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let used = 0;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const key = dateKey(year, month, day);
+        const record = records[key];
+
+        if (record && (record.ida || record.volta)) {
+          used++;
+        }
+      }
+
+      const unused = daysInMonth - used;
+      const total = used * PRICE_PER_DAY;
+
+      usedDaysEl.textContent = used;
+      unusedDaysEl.textContent = unused;
+      totalEl.textContent = formatMoney(total);
+    }
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      const now = new Date();
+      currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      renderCalendar();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      const monthName = monthNames[month];
+
+      const confirmed = confirm(
+        `Tem certeza que deseja apagar todos os registros de ${monthName} de ${year}?`
+      );
+
+      if (!confirmed) return;
+
+      for (let day = 1; day <= 31; day++) {
+        delete records[dateKey(year, month, day)];
+      }
+
+      save();
+      renderCalendar();
+    });
+
+    renderCalendar();
+  </script>
+</body>
+</html>
