@@ -472,19 +472,19 @@
 
     <section class="summary">
       <div class="summary-card">
-        <div class="summary-label">DIAS UTILIZADOS</div>
+        <div class="summary-label">VIAGENS UTILIZADAS</div>
         <div class="summary-value green" id="usedDays">0</div>
       </div>
 
       <div class="summary-card">
-        <div class="summary-label">DIAS NÃO UTILIZADOS</div>
+        <div class="summary-label">VIAGENS NÃO UTILIZADAS</div>
         <div class="summary-value" id="unusedDays">0</div>
       </div>
 
       <div class="summary-card total">
         <div>
           <div class="summary-label">TOTAL A PAGAR</div>
-          <div style="font-size:10px;color:var(--muted)">Cada dia com pelo menos uma viagem</div>
+          <div style="font-size:10px;color:var(--muted)">Cada ida ou volta custa R$ 10,00</div>
         </div>
         <div class="total-right">
           <div class="summary-value yellow" id="total">R$ 0,00</div>
@@ -525,8 +525,7 @@
 
     <div class="month-info">
       <strong>Como usar:</strong> toque em <strong>IDA</strong> ou <strong>VOLTA</strong> em cada dia.
-      Se pelo menos uma das duas viagens estiver marcada, o dia entra automaticamente na conta de
-      <strong>R$ 10,00</strong>.
+      Cada <strong>✓</strong> marcado custa <strong>R$ 10,00</strong>. Se marcar ida e volta no mesmo dia, serão <strong>R$ 20,00</strong>.
       Os registros ficam salvos automaticamente neste navegador.
     </div>
 
@@ -674,22 +673,26 @@
       const month = currentDate.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      let used = 0;
+      // Cada ✓ representa uma viagem e custa R$ 10,00.
+      // Ida + volta no mesmo dia = 2 ✓ = R$ 20,00.
+      let usedRides = 0;
 
       for (let day = 1; day <= daysInMonth; day++) {
         const key = dateKey(year, month, day);
         const record = records[key];
 
-        if (record && (record.ida || record.volta)) {
-          used++;
+        if (record) {
+          if (record.ida) usedRides++;
+          if (record.volta) usedRides++;
         }
       }
 
-      const unused = daysInMonth - used;
-      const total = used * PRICE_PER_DAY;
+      const totalPossibleRides = daysInMonth * 2;
+      const unusedRides = totalPossibleRides - usedRides;
+      const total = usedRides * PRICE_PER_DAY;
 
-      usedDaysEl.textContent = used;
-      unusedDaysEl.textContent = unused;
+      usedDaysEl.textContent = usedRides;
+      unusedDaysEl.textContent = unusedRides;
       totalEl.textContent = formatMoney(total);
     }
 
